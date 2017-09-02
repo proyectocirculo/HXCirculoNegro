@@ -12,27 +12,53 @@
       <header class="resultados__header">
         <h2>Resultados</h2>
       </header>
-      <ul class="resultados-list">
-        <li v-for="(item, index) in done" class="resultados-list__item">
-          <h3><strong>{{ (index + 1) }} - </strong>{{ item.name }}</h3>
-          <h4 v-if="item.state === 'success'" class="green">Respuesta: Correcta</h4>
-          <h4 v-if="item.state === 'fail'" class="red">Respuesta: Incorrecta</h4>
-          <p>{{ getAnswer(item, item.state) }}</p>
-        </li>
-      </ul>
-      <footer class="resultados__footer">
-        <h3>Puntaje: {{ correctas.length / done.length * 100 }}% de respuestas correctas.</h3>
-      </footer>
+      <div class="resultados__content">
+        <ul class="resultados-list">
+          <li v-for="(item, index) in done" class="resultados-list__item">
+            <h3><strong>{{ (index + 1) }} - </strong>{{ item.name }}</h3>
+            <h4 v-if="item.state === 'success'" class="green">Respuesta: Correcta</h4>
+            <h4 v-if="item.state === 'fail'" class="red">Respuesta: Incorrecta</h4>
+            <p>{{ getAnswer(item, item.state) }}</p>
+          </li>
+        </ul>
+        <div class="resultados__chart">
+          <vue-circle
+            id="circle"
+            :progress="percentage"
+            :size="100"
+            :reverse="false"
+            line-cap="round"
+            :fill="fill"
+            empty-fill="rgba(0, 0, 0, .1)"
+            :animation-start-value="0.0"
+            :start-angle="0"
+            insert-mode="append"
+            :thickness="5"
+            inner-text=""
+            :show-percent="true">
+          </vue-circle>
+          <h3>Puntaje: {{ percentage }}% de respuestas correctas.</h3>
+        </div>
+      </div>
     </div>
   </main>
 </template>
 
 <script>
 import GoogleMapsLoader from 'google-maps';
+import VueCircle from 'vue2-circle-progress';
 
 export default {
   name: 'Inicio',
+  data() {
+    return {
+      fill: { gradient: ['green'] },
+    };
+  },
   computed: {
+    percentage() {
+      return Math.ceil((this.correctas.length / this.done.length) * 100);
+    },
     puntos() {
       return this.$store.state.puntos;
     },
@@ -95,9 +121,19 @@ export default {
         marker.addListener('click', () => {
           this.linkTo(`/opcion/${punto.link}`);
         });
+        marker.addListener('mouseover', () => {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+        });
+        marker.addListener('mouseout', () => {
+          marker.setAnimation(null);
+        });
+
         return punto;
       });
     });
+  },
+  components: {
+    VueCircle,
   },
 };
 </script>

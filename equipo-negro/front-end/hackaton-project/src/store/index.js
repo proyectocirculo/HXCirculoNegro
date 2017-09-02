@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import axios from 'axios';
 
 Vue.use(Vuex);
 
@@ -166,6 +167,20 @@ export default new Vuex.Store({
           punto.state = options.state;
         }
         return punto;
+      });
+    },
+    updatePuntos(state, puntos) {
+      state.puntos = puntos;
+    },
+  },
+  actions: {
+    getPuntos({ commit }) {
+      // Categories
+      axios.get('/getPuntos').then((response) => {
+        commit('updatePuntos', response.data);
+      })
+      .catch((error) => {
+        console.log(error);
       });
     },
   },
